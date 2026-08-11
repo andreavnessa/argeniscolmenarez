@@ -1,0 +1,78 @@
+{% extends 'autenticacion/base.html' %}
+{% load static %}
+
+{% block title %}Panel Principal | Sistema{% endblock %}
+
+{% block content %}
+<div class="dashboard-card">
+    <div class="text-end mb-3">
+        <a href="{% url 'logout' %}" class="btn btn-outline-danger btn-sm">
+            <i class="bi bi-box-arrow-right me-1"></i>Cerrar Sesión
+        </a>
+    </div>
+
+    <div class="user-avatar">
+        {{ user.get_initials }}
+    </div>
+
+    <div class="user-info">
+        <h2>{{ user.get_full_name }}</h2>
+        <p><i class="bi bi-envelope me-1"></i>{{ user.email }}</p>
+    </div>
+
+    <div class="info-grid">
+        <div class="info-item">
+            <i class="bi bi-calendar-check"></i>
+            <div class="label">Fecha de registro</div>
+            <div class="value">{{ user.fecha_registro|date:"d/m/Y" }}</div>
+        </div>
+        <div class="info-item">
+            <i class="bi bi-clock-history"></i>
+            <div class="label">Último acceso</div>
+            <div class="value">
+                {% if user.ultimo_acceso %}
+                    {{ user.ultimo_acceso|date:"d/m/Y H:i" }}
+                {% else %}
+                    Primer acceso
+                {% endif %}
+            </div>
+        </div>
+        <div class="info-item">
+            <i class="bi bi-shield-lock"></i>
+            <div class="label">Pregunta de seguridad</div>
+            <div class="value">
+                {% if user.pregunta_seguridad %}
+                    Configurada
+                {% else %}
+                    No configurada
+                {% endif %}
+            </div>
+        </div>
+        <div class="info-item">
+            <i class="bi bi-person-badge"></i>
+            <div class="label">Rol</div>
+            <div class="value">
+                {% if user.is_superuser %}Administrador
+                {% elif user.is_staff %}Staff
+                {% else %}Usuario{% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="alert alert-success mb-4">
+        <div class="d-flex align-items-center">
+            <i class="bi bi-check-circle me-3 fs-4"></i>
+            <div>
+                <strong>Sesión iniciada correctamente</strong>
+                <div class="small-text">Ha accedido al sistema de forma segura.</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="btn-group-stack">
+        <a href="{% url 'admin:index' %}" class="btn btn-secondary">
+            <i class="bi bi-gear me-2"></i>Panel de Administración
+        </a>
+    </div>
+</div>
+{% endblock %}

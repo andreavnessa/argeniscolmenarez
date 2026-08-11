@@ -1,0 +1,65 @@
+{% extends 'autenticacion/base.html' %}
+{% load static %}
+
+{% block title %}Pregunta de Seguridad | Sistema{% endblock %}
+
+{% block content %}
+<div class="auth-card">
+    <div class="step-indicator">
+        <div class="step completed"></div>
+        <div class="step active"></div>
+        <div class="step"></div>
+    </div>
+
+    <div class="auth-header">
+        <div class="icon-circle">
+            <i class="bi bi-shield-lock-fill"></i>
+        </div>
+        <h1>Verificación de Seguridad</h1>
+        <p>Responda la pregunta de seguridad para continuar</p>
+    </div>
+
+    <div class="alert alert-info mb-4">
+        <div class="d-flex align-items-center">
+            <i class="bi bi-question-circle me-3 fs-4"></i>
+            <div>
+                <div class="fw-bold small-text mb-1">Pregunta de seguridad</div>
+                <div class="fw-semibold text-dark">{{ pregunta_texto }}</div>
+            </div>
+        </div>
+    </div>
+
+    {% if form.respuesta.errors %}
+    <div class="alert alert-danger mb-4">
+        {% for error in form.respuesta.errors %}
+        <div><i class="bi bi-exclamation-triangle me-2"></i>{{ error }}</div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <form method="post" novalidate>
+        {% csrf_token %}
+
+        <div class="mb-4">
+            <label for="{{ form.respuesta.id_for_label }}" class="form-label">
+                <i class="bi bi-pencil-square me-1"></i>Su respuesta
+            </label>
+            {{ form.respuesta }}
+            <div class="small-text mt-2">
+                <i class="bi bi-info-circle me-1"></i>
+                La respuesta no distingue entre mayúsculas y minúsculas.
+            </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary mb-3">
+            <i class="bi bi-shield-check me-2"></i>Verificar Respuesta
+        </button>
+
+        <div class="text-center">
+            <a href="{% url 'recuperar_contrasena' %}" class="text-decoration-none">
+                <i class="bi bi-arrow-left me-1"></i>Volver
+            </a>
+        </div>
+    </form>
+</div>
+{% endblock %}
