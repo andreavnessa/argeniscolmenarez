@@ -56,7 +56,7 @@ class UsuarioAdmin(UserAdmin):
         }),
         ('Seguridad', {
             'fields': ('pregunta_seguridad', 'respuesta_seguridad'),
-            'description': 'La respuesta de seguridad se almacena de forma encriptada.',
+            'description': 'La respuesta de seguridad se almacena en texto plano. Se recomienda usar una respuesta difícil de adivinar.',
         }),
         ('Estado de la cuenta', {
             'fields': (

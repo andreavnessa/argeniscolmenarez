@@ -1,0 +1,139 @@
+{% extends 'concejales/base.html' %}
+
+{% block title %}{{ titulo }} | Sistema de Gestion{% endblock %}
+
+{% block page_title %}{{ titulo }}{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'lista_personal' %}" class="text-decoration-none">Personal de Despacho</a></li>
+<li class="breadcrumb-item active" aria-current="page">{{ titulo }}</li>
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-person-workspace me-2"></i>{{ titulo }}
+            </div>
+            <div class="card-body p-4">
+                <form method="post" enctype="multipart/form-data" novalidate>
+                    {% csrf_token %}
+
+                    {% if form.non_field_errors %}
+                    <div class="alert alert-danger">
+                        {% for error in form.non_field_errors %}
+                        <div>{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+
+                    <div class="form-section">
+                        <h6><i class="bi bi-briefcase me-2"></i>Asignacion</h6>
+                        <div class="row g-3">
+                            <div class="col-md-8">
+                                <label class="form-label">{{ form.concejal.label }}</label>
+                                {{ form.concejal }}
+                                {% if form.concejal.errors %}
+                                <div class="text-danger small mt-1">{{ form.concejal.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">{{ form.cargo.label }}</label>
+                                {{ form.cargo }}
+                                {% if form.cargo.errors %}
+                                <div class="text-danger small mt-1">{{ form.cargo.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <h6><i class="bi bi-person me-2"></i>Datos Personales</h6>
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <label class="form-label">{{ form.cedula.label }}</label>
+                                {{ form.cedula }}
+                                {% if form.cedula.errors %}
+                                <div class="text-danger small mt-1">{{ form.cedula.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">{{ form.nombres.label }}</label>
+                                {{ form.nombres }}
+                                {% if form.nombres.errors %}
+                                <div class="text-danger small mt-1">{{ form.nombres.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">{{ form.apellidos.label }}</label>
+                                {{ form.apellidos }}
+                                {% if form.apellidos.errors %}
+                                <div class="text-danger small mt-1">{{ form.apellidos.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">{{ form.telefono.label }}</label>
+                                {{ form.telefono }}
+                                {% if form.telefono.errors %}
+                                <div class="text-danger small mt-1">{{ form.telefono.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">{{ form.correo.label }}</label>
+                                {{ form.correo }}
+                                {% if form.correo.errors %}
+                                <div class="text-danger small mt-1">{{ form.correo.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">{{ form.foto.label }}</label>
+                                {{ form.foto }}
+                                {% if form.foto.errors %}
+                                <div class="text-danger small mt-1">{{ form.foto.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <h6><i class="bi bi-clock me-2"></i>Informacion Laboral</h6>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">{{ form.fecha_ingreso.label }}</label>
+                                {{ form.fecha_ingreso }}
+                                {% if form.fecha_ingreso.errors %}
+                                <div class="text-danger small mt-1">{{ form.fecha_ingreso.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">{{ form.horario_trabajo.label }}</label>
+                                {{ form.horario_trabajo }}
+                                {% if form.horario_trabajo.errors %}
+                                <div class="text-danger small mt-1">{{ form.horario_trabajo.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">{{ form.estado.label }}</label>
+                                {{ form.estado }}
+                                {% if form.estado.errors %}
+                                <div class="text-danger small mt-1">{{ form.estado.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex gap-2 justify-content-end">
+                        <a href="{% if es_edicion and personal %}{% url 'detalle_concejal' personal.concejal_id %}{% else %}{% url 'lista_personal' %}{% endif %}" class="btn btn-secondary">
+                            <i class="bi bi-x-circle me-1"></i>Cancelar
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-circle me-1"></i>Guardar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

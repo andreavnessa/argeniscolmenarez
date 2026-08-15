@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'autenticacion',
+    'concejales',
 ]
 
 MIDDLEWARE = [
@@ -117,6 +118,10 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
+# Archivos multimedia (fotos de concejales y personal)
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
+
 # Modelo de usuario personalizado
 AUTH_USER_MODEL = 'autenticacion.Usuario'
 
@@ -129,8 +134,7 @@ LOGOUT_REDIRECT_URL = 'login'
 # Email
 # https://docs.djangoproject.com/en/6.1/topics/email/#topic-email-configuration
 
-MAILERS = {
-    'default': {
-        'BACKEND': 'django.core.mail.backends.console.EmailBackend',
-    },
-}
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+EMAIL_HOST = 'localhost'
+EMAIL_PORT = 25
+DEFAULT_FROM_EMAIL = 'noreply@concejomunicipal.com'

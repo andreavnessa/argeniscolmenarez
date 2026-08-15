@@ -61,7 +61,7 @@ class Usuario(AbstractUser):
         max_length=200,
         blank=True,
         null=True,
-        help_text='Se almacenará de forma encriptada',
+        help_text='Se almacena en texto plano. Se recomienda usar una respuesta que no sea fácil de adivinar.',
     )
 
     # Campos adicionales

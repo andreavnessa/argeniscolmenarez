@@ -1,0 +1,179 @@
+{% extends 'concejales/base.html' %}
+
+{% block title %}Concejales | Sistema de Gestión{% endblock %}
+
+{% block page_title %}Gestión de Concejales{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item active" aria-current="page">Concejales</li>
+{% endblock %}
+
+{% block content %}
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="stat-card">
+            <div class="stat-icon primary"><i class="bi bi-people"></i></div>
+            <div>
+                <div class="stat-value">{{ total_concejales }}</div>
+                <div class="stat-label">Total de Concejales</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="stat-card">
+            <div class="stat-icon success"><i class="bi bi-person-check"></i></div>
+            <div>
+                <div class="stat-value">{{ total_activos }}</div>
+                <div class="stat-label">Activos</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="stat-card">
+            <div class="stat-icon danger"><i class="bi bi-person-x"></i></div>
+            <div>
+                <div class="stat-value">{{ total_inactivos }}</div>
+                <div class="stat-label">Inactivos</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-3 align-items-end">
+            <div class="col-md-5">
+                <label class="form-label">Buscar</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
+                    <input type="text" name="q" value="{{ query }}" class="form-control" placeholder="Buscar por nombre, apellido o cédula...">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Estado</label>
+                <select name="estado" class="form-select">
+                    <option value="">Todos</option>
+                    <option value="Activo" {% if estado == 'Activo' %}selected{% endif %}>Activos</option>
+                    <option value="Inactivo" {% if estado == 'Inactivo' %}selected{% endif %}>Inactivos</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-primary w-100"><i class="bi bi-funnel me-1"></i>Filtrar</button>
+            </div>
+            <div class="col-md-2">
+                <a href="{% url 'lista_concejales' %}" class="btn btn-secondary w-100"><i class="bi bi-arrow-counterclockwise me-1"></i>Limpiar</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <p class="text-muted mb-0">
+        Mostrando {{ page_obj.start_index }} - {{ page_obj.end_index }} de {{ page_obj.paginator.count }} concejales
+    </p>
+    <a href="{% url 'crear_concejal' %}" class="btn btn-primary">
+        <i class="bi bi-person-plus me-1"></i>Nuevo Concejal
+    </a>
+</div>
+
+{% if concejales %}
+<div class="row g-4">
+    {% for concejal in concejales %}
+    <div class="col-md-6 col-lg-4">
+        <div class="concejal-card">
+            <div class="card-cover"></div>
+            <div class="card-body">
+                <div class="avatar">
+                    {% if concejal.foto %}
+                    <img src="{{ concejal.foto.url }}" alt="{{ concejal.get_nombre_completo }}">
+                    {% else %}
+                    {{ concejal.get_iniciales }}
+                    {% endif %}
+                </div>
+                <h5>{{ concejal.get_nombre_completo }}</h5>
+                <div class="cedula">C.I. {{ concejal.cedula }}</div>
+                <div class="comision">{{ concejal.comision_asignada }}</div>
+                <div class="mb-3">
+                    <span class="badge-estado {% if concejal.estado == 'Activo' %}activo{% else %}inactivo{% endif %}">
+                        {{ concejal.estado }}
+                    </span>
+                </div>
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <small class="text-muted">Equipo de despacho</small>
+                        <small class="fw-bold">{{ concejal.get_conteo_personal_activo }}/{{ limite_personal }}</small>
+                    </div>
+                    <div class="progress">
+                        <div class="progress-bar" style="width: {% widthratio concejal.get_conteo_personal_activo limite_personal 100 %}%"></div>
+                    </div>
+                </div>
+                <div class="card-actions">
+                    <a href="{% url 'detalle_concejal' concejal.pk %}" class="btn btn-outline-primary btn-sm">
+                        <i class="bi bi-eye me-1"></i>Ver Despacho
+                    </a>
+                    <a href="{% url 'editar_concejal' concejal.pk %}" class="btn btn-outline-secondary btn-sm">
+                        <i class="bi bi-pencil me-1"></i>Editar
+                    </a>
+                    {% if concejal.estado == 'Activo' %}
+                    <form method="post" action="{% url 'desactivar_concejal' concejal.pk %}" class="d-inline" onsubmit="return confirm('¿Está seguro de desactivar a {{ concejal.get_nombre_completo }}? Su personal de despacho también será desactivado.');">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-outline-danger btn-sm">
+                            <i class="bi bi-person-x me-1"></i>Desactivar
+                        </button>
+                    </form>
+                    {% else %}
+                    <form method="post" action="{% url 'activar_concejal' concejal.pk %}" class="d-inline">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-outline-success btn-sm">
+                            <i class="bi bi-person-check me-1"></i>Activar
+                        </button>
+                    </form>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+{% if page_obj.has_other_pages %}
+<nav class="mt-4">
+    <ul class="pagination justify-content-center">
+        {% if page_obj.has_previous %}
+        <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if query %}&q={{ query }}{% endif %}{% if estado %}&estado={{ estado }}{% endif %}">
+                <i class="bi bi-chevron-left"></i>
+            </a>
+        </li>
+        {% endif %}
+        {% for num in page_obj.paginator.page_range %}
+            {% if page_obj.number == num %}
+            <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ num }}{% if query %}&q={{ query }}{% endif %}{% if estado %}&estado={{ estado }}{% endif %}">{{ num }}</a>
+            </li>
+            {% endif %}
+        {% endfor %}
+        {% if page_obj.has_next %}
+        <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if query %}&q={{ query }}{% endif %}{% if estado %}&estado={{ estado }}{% endif %}">
+                <i class="bi bi-chevron-right"></i>
+            </a>
+        </li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
+
+{% else %}
+<div class="empty-state">
+    <i class="bi bi-people"></i>
+    <h5>No hay concejales registrados</h5>
+    <p>Comience registrando el primer concejal del municipio.</p>
+    <a href="{% url 'crear_concejal' %}" class="btn btn-primary mt-3">
+        <i class="bi bi-person-plus me-1"></i>Registrar Concejal
+    </a>
+</div>
+{% endif %}
+{% endblock %}

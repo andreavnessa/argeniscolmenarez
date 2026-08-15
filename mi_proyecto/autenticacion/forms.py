@@ -54,15 +54,14 @@ class LoginForm(forms.Form):
 
             if not usuario.check_password(password):
                 usuario.registrar_intento_fallido()
-                intentos_restantes = 5 - usuario.intentos_fallidos
-                if intentos_restantes > 0:
-                    raise ValidationError(
-                        f'Contraseña incorrecta. Le quedan {intentos_restantes} intentos.'
-                    )
-                else:
+                if usuario.esta_bloqueado():
                     raise ValidationError(
                         'Cuenta bloqueada por 15 minutos por múltiples intentos fallidos.'
                     )
+                intentos_restantes = max(5 - usuario.intentos_fallidos, 0)
+                raise ValidationError(
+                    f'Contraseña incorrecta. Le quedan {intentos_restantes} intentos.'
+                )
 
             # Credenciales válidas
             self.usuario = usuario

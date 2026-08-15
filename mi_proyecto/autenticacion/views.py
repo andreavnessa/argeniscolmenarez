@@ -6,6 +6,8 @@ from django.urls import reverse
 from django.utils import timezone
 from django.views.decorators.http import require_http_methods
 
+from concejales.models import Concejal, PersonalDespacho
+
 from .forms import (
     LoginForm,
     NuevaContrasenaForm,
@@ -53,7 +55,23 @@ def logout_view(request):
 @login_required
 def dashboard_view(request):
     """Vista del panel principal después del login."""
-    return render(request, 'autenticacion/dashboard.html')
+    # Estadísticas del sistema
+    total_concejales = Concejal.objects.count()
+    total_concejales_activos = Concejal.objects.filter(estado=Concejal.ESTADO_ACTIVO).count()
+    total_personal = PersonalDespacho.objects.count()
+    total_personal_activo = PersonalDespacho.objects.filter(estado=PersonalDespacho.ESTADO_ACTIVO).count()
+    limite_personal = Concejal.LIMITE_PERSONAL_DESPACHO
+
+    context = {
+        'total_concejales': total_concejales,
+        'total_concejales_activos': total_concejales_activos,
+        'total_concejales_inactivos': total_concejales - total_concejales_activos,
+        'total_personal': total_personal,
+        'total_personal_activo': total_personal_activo,
+        'total_personal_inactivo': total_personal - total_personal_activo,
+        'limite_personal': limite_personal,
+    }
+    return render(request, 'autenticacion/dashboard.html', context)
 
 
 @require_http_methods(['GET', 'POST'])

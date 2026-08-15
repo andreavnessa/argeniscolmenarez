@@ -1,0 +1,62 @@
+{% extends 'concejales/base.html' %}
+
+{% block title %}Reasignar Personal | Sistema de Gestion{% endblock %}
+
+{% block page_title %}Reasignar Personal de Despacho{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'lista_personal' %}" class="text-decoration-none">Personal de Despacho</a></li>
+<li class="breadcrumb-item active" aria-current="page">Reasignar</li>
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-arrow-left-right me-2"></i>Reasignar a {{ personal.get_nombre_completo }}
+            </div>
+            <div class="card-body p-4">
+                <div class="alert alert-info mb-4">
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-info-circle me-3 fs-4"></i>
+                        <div>
+                            <strong>Despacho actual:</strong> {{ personal.concejal.get_nombre_completo }}
+                            <div class="small-text">Cargo: {{ personal.cargo }} | Estado: {{ personal.estado }}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <form method="post" novalidate>
+                    {% csrf_token %}
+
+                    {% if form.non_field_errors %}
+                    <div class="alert alert-danger">
+                        {% for error in form.non_field_errors %}
+                        <div>{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+
+                    <div class="mb-3">
+                        <label class="form-label">{{ form.concejal.label }}</label>
+                        {{ form.concejal }}
+                        {% if form.concejal.errors %}
+                        <div class="text-danger small mt-1">{{ form.concejal.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="d-flex gap-2 justify-content-end">
+                        <a href="{% url 'detalle_concejal' personal.concejal_id %}" class="btn btn-secondary">
+                            <i class="bi bi-x-circle me-1"></i>Cancelar
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-arrow-left-right me-1"></i>Reasignar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
