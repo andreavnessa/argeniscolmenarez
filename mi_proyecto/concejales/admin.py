@@ -17,7 +17,7 @@ class PersonalDespachoInline(admin.TabularInline):
 
 @admin.register(Concejal)
 class ConcejalAdmin(admin.ModelAdmin):
-    list_display = ('get_nombre_completo', 'cedula', 'comision_asignada', 'estado', 'get_conteo_personal_activo')
+    list_display = ('get_nombre_completo', 'cedula', 'comision_asignada', 'estado', 'get_conteo_personal_activo', 'usuario')
     list_filter = ('estado', 'comision_asignada')
     search_fields = ('nombres', 'apellidos', 'cedula', 'correo')
     readonly_fields = ('id', 'created_at', 'updated_at')
@@ -30,7 +30,7 @@ class ConcejalAdmin(admin.ModelAdmin):
 
 @admin.register(PersonalDespacho)
 class PersonalDespachoAdmin(admin.ModelAdmin):
-    list_display = ('get_nombre_completo', 'cedula', 'cargo', 'concejal', 'estado')
+    list_display = ('get_nombre_completo', 'cedula', 'cargo', 'concejal', 'estado', 'usuario')
     list_filter = ('estado', 'cargo', 'concejal')
     search_fields = ('nombres', 'apellidos', 'cedula', 'correo')
     readonly_fields = ('id', 'created_at', 'updated_at')

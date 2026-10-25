@@ -1,0 +1,222 @@
+{% extends 'concejales/base.html' %}
+
+{% block title %}Asistencia | Sistema de Gestión{% endblock %}
+
+{% block page_title %}Asistencia{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item active" aria-current="page">Asistencia</li>
+{% endblock %}
+
+{% block content %}
+{% if es_administrador %}
+<div class="card mb-4">
+    <div class="card-header">
+        <i class="bi bi-clock-history me-2"></i>Marcar Entrada / Salida (Hoy)
+    </div>
+    <div class="card-body">
+        <div class="row g-3 align-items-end">
+            <div class="col-md-6">
+                <label class="form-label">Seleccione el afectado</label>
+                <select id="select_afectado" class="form-select">
+                    <option value="">Seleccione...</option>
+                    <optgroup label="Concejales">
+                        {% for c in concejales %}
+                        <option value="concejal:{{ c.pk }}">{{ c.get_nombre_completo }}</option>
+                        {% endfor %}
+                    </optgroup>
+                    <optgroup label="Personal de Despacho">
+                        {% for p in personal %}
+                        <option value="personal:{{ p.pk }}">{{ p.get_nombre_completo }} ({{ p.concejal.get_nombre_completo }})</option>
+                        {% endfor %}
+                    </optgroup>
+                </select>
+            </div>
+            <div class="col-md-6 d-flex gap-2 flex-wrap">
+                <form id="form_entrada" method="post" action="{% url 'marcar_entrada' %}" class="d-inline">
+                    {% csrf_token %}
+                    <input type="hidden" name="afectado" id="afectado_entrada" value="">
+                    <button type="button" class="btn btn-success" onclick="marcar('entrada')">
+                        <i class="bi bi-box-arrow-in-right me-1"></i>Marcar Entrada
+                    </button>
+                </form>
+                <form id="form_salida" method="post" action="{% url 'marcar_salida' %}" class="d-inline">
+                    {% csrf_token %}
+                    <input type="hidden" name="afectado" id="afectado_salida" value="">
+                    <button type="button" class="btn btn-danger" onclick="marcar('salida')">
+                        <i class="bi bi-box-arrow-right me-1"></i>Marcar Salida
+                    </button>
+                </form>
+                <a href="{% url 'crear_asistencia' %}" class="btn btn-outline-primary">
+                    <i class="bi bi-pencil-square me-1"></i>Registrar manual
+                </a>
+            </div>
+        </div>
+
+        {% if asistencias_hoy %}
+        <div class="table-responsive mt-3">
+            <table class="table table-sm align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th>Hoy - Afectado</th>
+                        <th>Entrada</th>
+                        <th>Salida</th>
+                        <th>Duración</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for a in asistencias_hoy %}
+                    <tr>
+                        <td class="fw-semibold">{{ a.get_afectado_nombre }} <small class="text-muted">({{ a.get_afectado_tipo_display }})</small></td>
+                        <td>
+                            {% if a.hora_entrada %}
+                            <span class="badge bg-success-subtle text-success">{{ a.hora_entrada|time:"H:i" }}</span>
+                            {% else %}—{% endif %}
+                        </td>
+                        <td>
+                            {% if a.hora_salida %}
+                            <span class="badge bg-danger-subtle text-danger">{{ a.hora_salida|time:"H:i" }}</span>
+                            {% else %}—{% endif %}
+                        </td>
+                        <td>{{ a.get_duracion_horas }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p class="text-muted mb-0 mt-3 small"><i class="bi bi-info-circle me-1"></i>Aún no hay registros de hoy.</p>
+        {% endif %}
+    </div>
+</div>
+{% endif %}
+
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-3 align-items-end">
+            <div class="col-md-4">
+                <label class="form-label">Buscar</label>
+                <input type="text" name="q" value="{{ query }}" class="form-control" placeholder="Nombre o apellido...">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Fecha</label>
+                <input type="date" name="fecha" value="{{ fecha }}" class="form-control">
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">Afectado</label>
+                <select name="afectado" class="form-select">
+                    <option value="">Todos</option>
+                    {% for valor, etiqueta in afectado_tipos %}
+                    <option value="{{ valor }}" {% if afectado == valor %}selected{% endif %}>{{ etiqueta }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-primary w-100"><i class="bi bi-funnel me-1"></i>Filtrar</button>
+            </div>
+            <div class="col-md-1">
+                <a href="{% url 'lista_asistencia' %}" class="btn btn-secondary w-100" title="Limpiar">
+                    <i class="bi bi-arrow-counterclockwise"></i>
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <p class="text-muted mb-0">
+        Mostrando {{ page_obj.start_index }} - {{ page_obj.end_index }} de {{ page_obj.paginator.count }} registros
+    </p>
+</div>
+
+{% if asistencias %}
+<div class="card">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead>
+                <tr>
+                    <th>Fecha</th>
+                    <th>Afectado</th>
+                    <th>Entrada</th>
+                    <th>Salida</th>
+                    <th>Duración</th>
+                    <th>Registrado por</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for a in asistencias %}
+                <tr>
+                    <td>{{ a.fecha|date:"d/m/Y" }}</td>
+                    <td>
+                        <div class="fw-semibold">{{ a.get_afectado_nombre }}</div>
+                        <small class="text-muted">{{ a.get_afectado_tipo_display }}</small>
+                    </td>
+                    <td>
+                        {% if a.hora_entrada %}
+                        <span class="badge bg-success-subtle text-success">{{ a.hora_entrada|time:"H:i" }}</span>
+                        {% else %}—{% endif %}
+                    </td>
+                    <td>
+                        {% if a.hora_salida %}
+                        <span class="badge bg-danger-subtle text-danger">{{ a.hora_salida|time:"H:i" }}</span>
+                        {% else %}—{% endif %}
+                    </td>
+                    <td>{{ a.get_duracion_horas }}</td>
+                    <td>{% if a.registrado_por %}{{ a.registrado_por.get_full_name }}{% else %}—{% endif %}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% if page_obj.has_other_pages %}
+<nav class="mt-4">
+    <ul class="pagination justify-content-center">
+        {% if page_obj.has_previous %}
+        <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if query %}&q={{ query }}{% endif %}{% if fecha %}&fecha={{ fecha }}{% endif %}{% if afectado %}&afectado={{ afectado }}{% endif %}">
+                <i class="bi bi-chevron-left"></i>
+            </a>
+        </li>
+        {% endif %}
+        {% for num in page_obj.paginator.page_range %}
+            {% if page_obj.number == num %}
+            <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ num }}{% if query %}&q={{ query }}{% endif %}{% if fecha %}&fecha={{ fecha }}{% endif %}{% if afectado %}&afectado={{ afectado }}{% endif %}">{{ num }}</a>
+            </li>
+            {% endif %}
+        {% endfor %}
+        {% if page_obj.has_next %}
+        <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if query %}&q={{ query }}{% endif %}{% if fecha %}&fecha={{ fecha }}{% endif %}{% if afectado %}&afectado={{ afectado }}{% endif %}">
+                <i class="bi bi-chevron-right"></i>
+            </a>
+        </li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
+
+{% else %}
+<div class="empty-state">
+    <i class="bi bi-clock-history"></i>
+    <h5>No hay registros de asistencia</h5>
+    <p>Registre la entrada de los concejales y personal del día.</p>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function marcar(tipo) {
+        var v = document.getElementById('select_afectado').value;
+        if (!v) { alert('Seleccione un concejal o personal de despacho.'); return; }
+        document.getElementById('afectado_' + tipo).value = v;
+        document.getElementById('form_' + tipo).submit();
+    }
+</script>
+{% endblock %}
+

@@ -1,0 +1,114 @@
+{% extends 'concejales/base.html' %}
+
+{% block title %}{{ titulo }} | Sistema de Gestión{% endblock %}
+
+{% block page_title %}{{ titulo }}{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'lista_asistencia' %}" class="text-decoration-none">Asistencia</a></li>
+<li class="breadcrumb-item active" aria-current="page">{{ titulo }}</li>
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-clock-history me-2"></i>{{ titulo }}
+            </div>
+            <div class="card-body p-4">
+                <form method="post" novalidate>
+                    {% csrf_token %}
+
+                    {% if form.non_field_errors %}
+                    <div class="alert alert-danger">
+                        {% for error in form.non_field_errors %}
+                        <div>{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+
+                    <div class="form-section">
+                        <h6><i class="bi bi-person-badge me-2"></i>Afectado</h6>
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <label class="form-label">{{ form.afectado_tipo.label }}</label>
+                                {{ form.afectado_tipo }}
+                                {% if form.afectado_tipo.errors %}
+                                <div class="text-danger small mt-1">{{ form.afectado_tipo.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-8" id="campo_concejal">
+                                <label class="form-label">{{ form.concejal.label }}</label>
+                                {{ form.concejal }}
+                                {% if form.concejal.errors %}
+                                <div class="text-danger small mt-1">{{ form.concejal.errors.0 }}</div>
+                                {% endif %}
+                                <div class="form-text">{{ form.concejal.help_text }}</div>
+                            </div>
+                            <div class="col-md-8" id="campo_personal">
+                                <label class="form-label">{{ form.personal_despacho.label }}</label>
+                                {{ form.personal_despacho }}
+                                {% if form.personal_despacho.errors %}
+                                <div class="text-danger small mt-1">{{ form.personal_despacho.errors.0 }}</div>
+                                {% endif %}
+                                <div class="form-text">{{ form.personal_despacho.help_text }}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <h6><i class="bi bi-clock me-2"></i>Registro</h6>
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <label class="form-label">{{ form.fecha.label }}</label>
+                                {{ form.fecha }}
+                                {% if form.fecha.errors %}
+                                <div class="text-danger small mt-1">{{ form.fecha.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">{{ form.hora_entrada.label }}</label>
+                                {{ form.hora_entrada }}
+                                {% if form.hora_entrada.errors %}
+                                <div class="text-danger small mt-1">{{ form.hora_entrada.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">{{ form.hora_salida.label }}</label>
+                                {{ form.hora_salida }}
+                                {% if form.hora_salida.errors %}
+                                <div class="text-danger small mt-1">{{ form.hora_salida.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex gap-2 justify-content-end">
+                        <a href="{% url 'lista_asistencia' %}" class="btn btn-secondary">
+                            <i class="bi bi-x-circle me-1"></i>Cancelar
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-circle me-1"></i>Guardar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function actualizarAfectado() {
+        var tipo = document.getElementById('id_afectado_tipo').value;
+        document.getElementById('campo_concejal').style.display = (tipo === 'concejal') ? '' : 'none';
+        document.getElementById('campo_personal').style.display = (tipo === 'personal') ? '' : 'none';
+    }
+    document.addEventListener('DOMContentLoaded', function () {
+        actualizarAfectado();
+        document.getElementById('id_afectado_tipo').addEventListener('change', actualizarAfectado);
+    });
+</script>
+{% endblock %}

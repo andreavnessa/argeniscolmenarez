@@ -11,6 +11,11 @@
         </a>
     </div>
 
+    <div class="text-center mb-4">
+        <img src="{% static 'img/logo.png' %}" alt="Concejo Municipal" width="88" height="88" style="border-radius:12px;">
+    </div>
+
+
     <div class="user-avatar">
         {{ user.get_initials }}
     </div>
@@ -52,9 +57,10 @@
             <i class="bi bi-person-badge"></i>
             <div class="label">Rol</div>
             <div class="value">
-                {% if user.is_superuser %}Administrador
-                {% elif user.is_staff %}Staff
-                {% else %}Usuario{% endif %}
+                {% if es_administrador %}Administrador
+                {% elif es_concejal %}Concejal
+                {% elif es_despacho %}Personal de Despacho
+                {% else %}{{ user.get_rol_display }}{% endif %}
             </div>
         </div>
     </div>
@@ -72,6 +78,7 @@
     <div class="mb-4">
         <h5 class="fw-bold mb-3"><i class="bi bi-grid me-2"></i>Módulos del Sistema</h5>
         <div class="row g-3">
+            {% if es_administrador %}
             <div class="col-md-6">
                 <a href="{% url 'lista_concejales' %}" class="text-decoration-none">
                     <div class="info-item" style="cursor: pointer; transition: all 0.3s;">
@@ -84,6 +91,20 @@
                     </div>
                 </a>
             </div>
+            {% else %}
+            <div class="col-md-6">
+                <a href="{% url 'detalle_concejal' mi_concejal.pk %}" class="text-decoration-none">
+                    <div class="info-item" style="cursor: pointer; transition: all 0.3s;">
+                        <i class="bi bi-person-badge" style="font-size: 32px; color: var(--primary-color);"></i>
+                        <div class="label">Mi Despacho</div>
+                        <div class="value">{{ mi_concejal.get_nombre_completo }}</div>
+                        <div class="small-text mt-1">
+                            {{ total_personal_activo }} personal activo | {{ total_personal_inactivo }} inactivo
+                        </div>
+                    </div>
+                </a>
+            </div>
+            {% endif %}
             <div class="col-md-6">
                 <a href="{% url 'lista_personal' %}" class="text-decoration-none">
                     <div class="info-item" style="cursor: pointer; transition: all 0.3s;">
@@ -96,13 +117,41 @@
                     </div>
                 </a>
             </div>
+            <div class="col-md-6">
+                <a href="{% url 'lista_incidentes' %}" class="text-decoration-none">
+                    <div class="info-item" style="cursor: pointer; transition: all 0.3s;">
+                        <i class="bi bi-exclamation-triangle" style="font-size: 32px; color: var(--warning-color);"></i>
+                        <div class="label">Incidentes y Permisos</div>
+                        <div class="value">{{ total_incidentes }} registrados</div>
+                        <div class="small-text mt-1">
+                            {{ total_incidentes_pendientes }} pendientes
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            <div class="col-md-6">
+                <a href="{% url 'reportes' %}" class="text-decoration-none">
+                    <div class="info-item" style="cursor: pointer; transition: all 0.3s;">
+                        <i class="bi bi-bar-chart" style="font-size: 32px; color: var(--primary-color);"></i>
+                        <div class="label">Reportes</div>
+                        <div class="value">Asistencia y permisos</div>
+                        <div class="small-text mt-1">
+                            Pantalla, CSV e imprimir
+                        </div>
+                    </div>
+                </a>
+            </div>
+
         </div>
     </div>
 
+    {% if es_administrador %}
     <div class="btn-group-stack">
         <a href="{% url 'admin:index' %}" class="btn btn-secondary">
             <i class="bi bi-gear me-2"></i>Panel de Administración
         </a>
     </div>
+    {% endif %}
 </div>
 {% endblock %}

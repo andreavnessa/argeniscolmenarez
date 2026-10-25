@@ -1,0 +1,125 @@
+{% extends 'concejales/base.html' %}
+
+{% block title %}Reporte de Asistencia | Sistema{% endblock %}
+
+{% block page_title %}Reporte de Asistencia{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'reportes' %}" class="text-decoration-none">Reportes</a></li>
+<li class="breadcrumb-item active" aria-current="page">Asistencia</li>
+{% endblock %}
+
+{% block content %}
+<style>
+    @media print {
+        .sidebar, .topbar, .no-print { display: none !important; }
+        .main-content { margin-left: 0 !important; padding: 0 !important; }
+        .card { box-shadow: none !important; border: 1px solid #cbd5e1 !important; }
+    }
+</style>
+
+<div class="d-flex justify-content-between align-items-center mb-3 no-print">
+    <a href="{% url 'reportes' %}" class="btn btn-secondary btn-sm"><i class="bi bi-arrow-left me-1"></i>Reportes</a>
+    <div class="d-flex gap-2">
+        <a href="{% url 'reporte_asistencia_csv' %}?{{ request.GET.urlencode }}" class="btn btn-success btn-sm">
+            <i class="bi bi-filetype-csv me-1"></i>Descargar CSV (Excel)
+        </a>
+        <button class="btn btn-primary btn-sm" onclick="window.print()">
+            <i class="bi bi-printer me-1"></i>Imprimir / PDF
+        </button>
+    </div>
+</div>
+
+<div class="card mb-4 no-print">
+    <div class="card-body">
+        <form method="get" class="row g-3 align-items-end">
+            <div class="col-md-3">
+                <label class="form-label">Desde</label>
+                <input type="date" name="desde" value="{{ desde|date:'Y-m-d' }}" class="form-control">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Hasta</label>
+                <input type="date" name="hasta" value="{{ hasta|date:'Y-m-d' }}" class="form-control">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Buscar</label>
+                <input type="text" name="q" value="{{ q }}" class="form-control" placeholder="Nombre o apellido...">
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">Afectado</label>
+                <select name="afectado" class="form-select">
+                    <option value="">Todos</option>
+                    {% for valor, etiqueta in afectado_tipos %}
+                    <option value="{{ valor }}" {% if afectado == valor %}selected{% endif %}>{{ etiqueta }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-1">
+                <button type="submit" class="btn btn-primary w-100"><i class="bi bi-funnel"></i></button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="stat-card"><div class="stat-icon primary"><i class="bi bi-calendar-check"></i></div><div><div class="stat-value">{{ total_registros }}</div><div class="stat-label">Registros</div></div></div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card"><div class="stat-icon success"><i class="bi bi-box-arrow-in-right"></i></div><div><div class="stat-value">{{ total_entradas }}</div><div class="stat-label">Entradas</div></div></div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card"><div class="stat-icon danger"><i class="bi bi-box-arrow-right"></i></div><div><div class="stat-value">{{ total_salidas }}</div><div class="stat-label">Salidas</div></div></div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card"><div class="stat-icon warning"><i class="bi bi-hourglass-split"></i></div><div><div class="stat-value">{{ total_horas }}</div><div class="stat-label">Total Horas</div></div></div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-5">
+        <div class="card mb-4">
+            <div class="card-header">Resumen por persona ({{ resumen|length }})</div>
+            <div class="table-responsive">
+                <table class="table table-sm align-middle mb-0">
+                    <thead><tr><th>Persona</th><th>Días</th><th>Horas</th></tr></thead>
+                    <tbody>
+                        {% for persona, datos in resumen %}
+                        <tr>
+                            <td>{{ persona }} <small class="text-muted">({{ datos.tipo }})</small></td>
+                            <td>{{ datos.dias }}</td>
+                            <td>{{ datos.tiempo }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="3" class="text-center text-muted py-3">Sin datos en el rango</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-7">
+        <div class="card mb-4">
+            <div class="card-header">Detalle del período ({{ desde|date:"d/m/Y" }} - {{ hasta|date:"d/m/Y" }})</div>
+            <div class="table-responsive">
+                <table class="table table-sm align-middle mb-0">
+                    <thead><tr><th>Fecha</th><th>Afectado</th><th>Entrada</th><th>Salida</th><th>Duración</th></tr></thead>
+                    <tbody>
+                        {% for a in registros %}
+                        <tr>
+                            <td>{{ a.fecha|date:"d/m/Y" }}</td>
+                            <td>{{ a.get_afectado_nombre }} <small class="text-muted">({{ a.get_afectado_tipo_display }})</small></td>
+                            <td>{% if a.hora_entrada %}{{ a.hora_entrada|time:"H:i" }}{% else %}—{% endif %}</td>
+                            <td>{% if a.hora_salida %}{{ a.hora_salida|time:"H:i" }}{% else %}—{% endif %}</td>
+                            <td>{{ a.get_duracion_horas }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="5" class="text-center text-muted py-3">Sin registros en el rango seleccionado.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

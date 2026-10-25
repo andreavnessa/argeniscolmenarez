@@ -13,13 +13,14 @@ class UsuarioAdmin(UserAdmin):
     list_display = (
         'email',
         'get_full_name',
+        'rol',
         'is_active',
         'is_staff',
         'fecha_registro',
         'ultimo_acceso',
         'intentos_fallidos',
     )
-    list_filter = ('is_active', 'is_staff', 'is_superuser', 'pregunta_seguridad', 'date_joined')
+    list_filter = ('rol', 'is_active', 'is_staff', 'is_superuser', 'pregunta_seguridad', 'date_joined')
     search_fields = ('email', 'first_name', 'last_name', 'telefono')
     ordering = ('-date_joined',)
 
@@ -34,6 +35,9 @@ class UsuarioAdmin(UserAdmin):
                 'password1',
                 'password2',
             ),
+        }),
+        ('Rol', {
+            'fields': ('rol',),
         }),
         ('Información personal', {
             'fields': ('telefono', 'fecha_nacimiento'),
@@ -50,6 +54,9 @@ class UsuarioAdmin(UserAdmin):
     fieldsets = (
         (None, {
             'fields': ('email', 'password'),
+        }),
+        ('Rol', {
+            'fields': ('rol',),
         }),
         ('Información personal', {
             'fields': ('first_name', 'last_name', 'telefono', 'fecha_nacimiento'),

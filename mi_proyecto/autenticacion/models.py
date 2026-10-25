@@ -72,6 +72,24 @@ class Usuario(AbstractUser):
     intentos_fallidos = models.PositiveIntegerField('Intentos fallidos', default=0)
     bloqueado_hasta = models.DateTimeField('Bloqueado hasta', blank=True, null=True)
 
+    # Roles del sistema
+    ROL_ADMINISTRADOR = 'administrador'
+    ROL_CONCEJAL = 'concejal'
+    ROL_DESPACHO = 'despacho'
+    ROLES = [
+        (ROL_ADMINISTRADOR, 'Administrador'),
+        (ROL_CONCEJAL, 'Concejal'),
+        (ROL_DESPACHO, 'Personal de Despacho'),
+    ]
+
+    rol = models.CharField(
+        'Rol',
+        max_length=20,
+        choices=ROLES,
+        default=ROL_DESPACHO,
+        help_text='Define los permisos del usuario en el sistema.',
+    )
+
     # Configuración
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['first_name', 'last_name']
@@ -118,3 +136,33 @@ class Usuario(AbstractUser):
         if self.bloqueado_hasta and self.bloqueado_hasta > timezone.now():
             return True
         return False
+
+    # ---- Propiedades de rol ----
+    @property
+    def es_administrador(self):
+        """True si el usuario tiene rol Administrador (o es superusuario)."""
+        return self.is_superuser or self.rol == self.ROL_ADMINISTRADOR
+
+    @property
+    def es_concejal(self):
+        """True si el usuario tiene rol Concejal."""
+        return self.rol == self.ROL_CONCEJAL
+
+    @property
+    def es_despacho(self):
+        """True si el usuario tiene rol Personal de Despacho."""
+        return self.rol == self.ROL_DESPACHO
+
+    def get_concejal(self):
+        """Devuelve el Concejal asociado al usuario según su rol.
+
+        - Concejal: su propio registro de Concejal.
+        - Personal de Despacho: el concejal al que pertenece su despacho.
+        - Administrador: None (puede ver todo).
+        """
+        if self.es_concejal:
+            return getattr(self, 'concejal_perfil', None)
+        if self.es_despacho:
+            perfil = getattr(self, 'personal_despacho_perfil', None)
+            return perfil.concejal if perfil else None
+        return None

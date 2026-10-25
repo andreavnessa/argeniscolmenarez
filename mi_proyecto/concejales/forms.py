@@ -176,11 +176,23 @@ class PersonalDespachoForm(forms.ModelForm):
         }
 
     def __init__(self, *args, **kwargs):
+        user = kwargs.pop('user', None)
         super().__init__(*args, **kwargs)
         # Limitar el selector de concejales a los activos
         self.fields['concejal'].queryset = Concejal.objects.filter(
             estado=Concejal.ESTADO_ACTIVO
         ).order_by('apellidos', 'nombres')
+
+        # Si el usuario es un concejal, restringir a su propio despacho
+        if user is not None and user.is_authenticated and user.es_concejal:
+            concejal = getattr(user, 'concejal_perfil', None)
+            if concejal:
+                self.fields['concejal'].queryset = Concejal.objects.filter(pk=concejal.pk)
+                self.fields['concejal'].initial = concejal.pk
+                self.fields['concejal'].disabled = True
+                self.fields['concejal'].help_text = (
+                    'Solo puede registrar personal en su propio despacho.'
+                )
 
     def clean_cedula(self):
         cedula = self.cleaned_data.get('cedula', '').strip()

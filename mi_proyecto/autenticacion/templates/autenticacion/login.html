@@ -4,8 +4,35 @@
 {% block title %}Iniciar Sesión | Sistema{% endblock %}
 
 {% block content %}
+<style>
+    /* ===== LOGIN TEMA OSCURO ===== */
+    body {
+        background: linear-gradient(135deg, #0b1120 0%, #0f172a 45%, #020617 100%) !important;
+    }
+    .auth-card {
+        background: #111a2e !important;
+        color: #e2e8f0 !important;
+        border: 1px solid #1e2b45 !important;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+    }
+    .auth-header p, .small-text, .text-muted { color: #94a3b8 !important; }
+    .icon-circle { background: #172554 !important; }
+    .icon-circle i { color: #f8fafc !important; }
+    .form-control, .form-select, .password-wrapper input {
+        background-color: #0d1526 !important;
+        border-color: #1e2b45 !important;
+        color: #e2e8f0 !important;
+    }
+    .form-control:focus, .form-select:focus { border-color: #2563eb !important; }
+    .form-label { color: #cbd5e1 !important; }
+    .password-toggle { color: #94a3b8 !important; }
+</style>
+
+
 <div class="auth-card">
     <div class="auth-header">
+        <img src="{% static 'img/logo.png' %}" alt="Logo Concejo Municipal" width="110" height="110" style="margin-bottom:8px; border-radius:14px;">
+
         <div class="icon-circle">
             <i class="bi bi-shield-lock"></i>
         </div>

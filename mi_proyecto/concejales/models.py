@@ -1,5 +1,6 @@
 import uuid
 
+from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import models
 
@@ -45,6 +46,15 @@ class Concejal(models.Model):
         max_length=10,
         choices=ESTADOS,
         default=ESTADO_ACTIVO,
+    )
+    usuario = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='concejal_perfil',
+        verbose_name='Usuario de acceso',
+        help_text='Cuenta de usuario asociada a este concejal (rol Concejal).',
     )
     created_at = models.DateTimeField('Fecha de creación', auto_now_add=True)
     updated_at = models.DateTimeField('Fecha de actualización', auto_now=True)
@@ -137,6 +147,15 @@ class PersonalDespacho(models.Model):
         max_length=10,
         choices=ESTADOS,
         default=ESTADO_ACTIVO,
+    )
+    usuario = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='personal_despacho_perfil',
+        verbose_name='Usuario de acceso',
+        help_text='Cuenta de usuario asociada a este personal de despacho (rol Despacho).',
     )
     created_at = models.DateTimeField('Fecha de creación', auto_now_add=True)
     updated_at = models.DateTimeField('Fecha de actualización', auto_now=True)

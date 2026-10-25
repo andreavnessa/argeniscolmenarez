@@ -1,0 +1,92 @@
+{% extends 'concejales/base.html' %}
+
+{% block title %}Reportes | Sistema de Gestión{% endblock %}
+
+{% block page_title %}Reportes{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item active" aria-current="page">Reportes</li>
+{% endblock %}
+
+{% block content %}
+<style>
+    @media print {
+        .sidebar, .topbar, .no-print { display: none !important; }
+        .main-content { margin-left: 0 !important; padding: 0 !important; }
+        .card { box-shadow: none !important; border: 1px solid #cbd5e1 !important; }
+    }
+</style>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="stat-card">
+            <div class="stat-icon primary"><i class="bi bi-clock-history"></i></div>
+            <div>
+                <div class="stat-value">{{ total_asistencias }}</div>
+                <div class="stat-label">Registros de Asistencia</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="stat-card">
+            <div class="stat-icon warning"><i class="bi bi-exclamation-triangle"></i></div>
+            <div>
+                <div class="stat-value">{{ total_incidentes }}</div>
+                <div class="stat-label">Incidentes y Permisos</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="stat-card">
+            <div class="stat-icon success"><i class="bi bi-check-circle"></i></div>
+            <div>
+                <div class="stat-value">{{ total_incidentes_pendientes }}</div>
+                <div class="stat-label">Permisos Pendientes</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-md-6 col-lg-4">
+        <div class="card h-100">
+            <div class="card-body text-center p-4">
+                <i class="bi bi-clock-history" style="font-size: 40px; color: var(--primary-color);"></i>
+                <h5 class="mt-3 mb-1">Reporte de Asistencia</h5>
+                <p class="text-muted small">Entradas y salidas por rango de fechas, con resumen por persona.</p>
+                <a href="{% url 'reporte_asistencia' %}" class="btn btn-primary mt-2">
+                    <i class="bi bi-graph-up me-1"></i>Abrir
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-lg-4">
+        <div class="card h-100">
+            <div class="card-body text-center p-4">
+                <i class="bi bi-exclamation-triangle" style="font-size: 40px; color: var(--warning-color);"></i>
+                <h5 class="mt-3 mb-1">Reporte de Incidencias</h5>
+                <p class="text-muted small">Permisos y reposos por tipo, estado y rango de fechas.</p>
+                <a href="{% url 'reporte_incidencias' %}" class="btn btn-primary mt-2">
+                    <i class="bi bi-graph-up me-1"></i>Abrir
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-lg-4">
+        <div class="card h-100">
+            <div class="card-body text-center p-4">
+                <i class="bi bi-people" style="font-size: 40px; color: var(--success-color);"></i>
+                <h5 class="mt-3 mb-1">Reporte de Concejales</h5>
+                <p class="text-muted small">Composición del concejo y personal por despacho y comisión.</p>
+                <a href="{% url 'reporte_concejales' %}" class="btn btn-primary mt-2">
+                    <i class="bi bi-graph-up me-1"></i>Abrir
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<p class="text-muted small mt-4 mb-0">
+    <i class="bi bi-info-circle me-1"></i>Cada reporte puede descargarse en CSV (Excel) o imprimirse a PDF con el navegador. Fecha de consulta: {{ fecha_hoy|date:"d/m/Y" }}.
+</p>
+{% endblock %}

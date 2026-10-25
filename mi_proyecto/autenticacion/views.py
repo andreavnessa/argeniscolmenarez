@@ -5,8 +5,12 @@ from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.utils import timezone
 from django.views.decorators.http import require_http_methods
+from django.db.models import Q
+
 
 from concejales.models import Concejal, PersonalDespacho
+from incidentes.models import Incidente
+
 
 from .forms import (
     LoginForm,
@@ -54,13 +58,57 @@ def logout_view(request):
 
 @login_required
 def dashboard_view(request):
-    """Vista del panel principal después del login."""
-    # Estadísticas del sistema
-    total_concejales = Concejal.objects.count()
-    total_concejales_activos = Concejal.objects.filter(estado=Concejal.ESTADO_ACTIVO).count()
-    total_personal = PersonalDespacho.objects.count()
-    total_personal_activo = PersonalDespacho.objects.filter(estado=PersonalDespacho.ESTADO_ACTIVO).count()
-    limite_personal = Concejal.LIMITE_PERSONAL_DESPACHO
+    """Vista del panel principal después del login.
+
+    - Administrador: estadísticas globales del sistema.
+    - Concejal / Personal de Despacho: estadísticas de su propio despacho.
+    """
+    user = request.user
+
+    # ---- Estadísticas por rol ----
+    if user.es_administrador:
+        total_concejales = Concejal.objects.count()
+        total_concejales_activos = Concejal.objects.filter(estado=Concejal.ESTADO_ACTIVO).count()
+        total_personal = PersonalDespacho.objects.count()
+        total_personal_activo = PersonalDespacho.objects.filter(estado=PersonalDespacho.ESTADO_ACTIVO).count()
+        limite_personal = Concejal.LIMITE_PERSONAL_DESPACHO
+        mi_concejal = None
+        total_personal_propio = 0
+        total_personal_propio_activo = 0
+        total_incidentes = Incidente.objects.count()
+        total_incidentes_pendientes = Incidente.objects.filter(
+            estado=Incidente.ESTADO_PENDIENTE
+        ).count()
+
+
+    else:
+        mi_concejal = user.get_concejal()
+        if mi_concejal is None:
+            messages.warning(
+                request,
+                'Su cuenta de usuario no está asociada a ningún concejal. '
+                'Contacte al administrador para asociar su despacho.'
+            )
+            return redirect('logout')
+        total_concejales = 1
+        total_concejales_activos = 1 if mi_concejal.estado == Concejal.ESTADO_ACTIVO else 0
+        total_personal = mi_concejal.get_conteo_personal_total()
+        total_personal_activo = mi_concejal.get_conteo_personal_activo()
+        limite_personal = Concejal.LIMITE_PERSONAL_DESPACHO
+        total_personal_propio = total_personal
+        # Incidentes del propio despacho
+        total_incidentes = Incidente.objects.filter(
+            Q(concejal_id=mi_concejal.pk)
+            | Q(personal_despacho__concejal_id=mi_concejal.pk)
+        ).count()
+        total_incidentes_pendientes = Incidente.objects.filter(
+            Q(concejal_id=mi_concejal.pk)
+            | Q(personal_despacho__concejal_id=mi_concejal.pk),
+            estado=Incidente.ESTADO_PENDIENTE,
+        ).count()
+
+
+        total_personal_propio_activo = total_personal_activo
 
     context = {
         'total_concejales': total_concejales,
@@ -70,6 +118,12 @@ def dashboard_view(request):
         'total_personal_activo': total_personal_activo,
         'total_personal_inactivo': total_personal - total_personal_activo,
         'limite_personal': limite_personal,
+        'mi_concejal': mi_concejal,
+        'total_personal_propio': total_personal_propio,
+        'total_personal_propio_activo': total_personal_propio_activo,
+        'total_incidentes': total_incidentes,
+        'total_incidentes_pendientes': total_incidentes_pendientes,
+
     }
     return render(request, 'autenticacion/dashboard.html', context)
 

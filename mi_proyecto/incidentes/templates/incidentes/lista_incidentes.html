@@ -1,0 +1,205 @@
+{% extends 'concejales/base.html' %}
+
+{% block title %}Incidentes y Permisos | Sistema de Gestión{% endblock %}
+
+{% block page_title %}Incidentes y Permisos{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item active" aria-current="page">Incidentes y Permisos</li>
+{% endblock %}
+
+{% block content %}
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="stat-card">
+            <div class="stat-icon primary"><i class="bi bi-exclamation-triangle"></i></div>
+            <div>
+                <div class="stat-value">{{ total_incidentes }}</div>
+                <div class="stat-label">Total de Incidentes</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card">
+            <div class="stat-icon warning"><i class="bi bi-hourglass-split"></i></div>
+            <div>
+                <div class="stat-value">{{ total_pendientes }}</div>
+                <div class="stat-label">Pendientes</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card">
+            <div class="stat-icon success"><i class="bi bi-check-circle"></i></div>
+            <div>
+                <div class="stat-value">{{ total_aprobados }}</div>
+                <div class="stat-label">Aprobados</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card">
+            <div class="stat-icon danger"><i class="bi bi-x-circle"></i></div>
+            <div>
+                <div class="stat-value">{{ total_rechazados }}</div>
+                <div class="stat-label">Rechazados</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-3 align-items-end">
+            <div class="col-md-4">
+                <label class="form-label">Buscar</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
+                    <input type="text" name="q" value="{{ query }}" class="form-control" placeholder="Nombre o motivo...">
+                </div>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">Estado</label>
+                <select name="estado" class="form-select">
+                    <option value="">Todos</option>
+                    {% for valor, etiqueta in estados %}
+                    <option value="{{ valor }}" {% if estado == valor %}selected{% endif %}>{{ etiqueta }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">Tipo de permiso</label>
+                <select name="tipo" class="form-select">
+                    <option value="">Todos</option>
+                    {% for valor, etiqueta in tipos_permiso %}
+                    <option value="{{ valor }}" {% if tipo == valor %}selected{% endif %}>{{ etiqueta }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">Afectado</label>
+                <select name="afectado" class="form-select">
+                    <option value="">Todos</option>
+                    {% for valor, etiqueta in afectado_tipos %}
+                    <option value="{{ valor }}" {% if afectado == valor %}selected{% endif %}>{{ etiqueta }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-primary w-100"><i class="bi bi-funnel me-1"></i>Filtrar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <p class="text-muted mb-0">
+        Mostrando {{ page_obj.start_index }} - {{ page_obj.end_index }} de {{ page_obj.paginator.count }} incidentes
+    </p>
+    {% if es_administrador %}
+    <a href="{% url 'crear_incidente' %}" class="btn btn-primary">
+        <i class="bi bi-plus-circle me-1"></i>Nuevo Incidente
+    </a>
+    {% endif %}
+</div>
+
+{% if incidentes %}
+<div class="card">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead>
+                <tr>
+                    <th>Afectado</th>
+                    <th>Tipo de permiso</th>
+                    <th>Fecha inicio</th>
+                    <th>Fecha fin</th>
+                    <th>Duración</th>
+                    <th>Estado</th>
+                    <th class="text-end">Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for incidente in incidentes %}
+                <tr>
+                    <td>
+                        <div class="fw-semibold">{{ incidente.get_afectado_nombre }}</div>
+                        <small class="text-muted">{{ incidente.get_afectado_tipo_display }}</small>
+                    </td>
+                    <td>{{ incidente.get_tipo_permiso_display }}{% if incidente.adjunto %} <i class="bi bi-paperclip text-primary" title="Documento adjunto"></i>{% endif %}</td>
+                    <td>{{ incidente.fecha_inicio|date:"d/m/Y" }}</td>
+                    <td>{% if incidente.fecha_fin %}{{ incidente.fecha_fin|date:"d/m/Y" }}{% else %}Indefinido{% endif %}</td>
+                    <td>{% if incidente.get_duracion_dias %}{{ incidente.get_duracion_dias }} día(s){% else %}—{% endif %}</td>
+                    <td>
+                        <span class="badge-estado {% if incidente.estado == 'aprobado' or incidente.estado == 'finalizado' %}activo{% elif incidente.estado == 'rechazado' %}inactivo{% else %}pendiente{% endif %}" style="{% if incidente.estado == 'pendiente' %}background:#fef3c7;color:#b45309;{% endif %}">
+                            {{ incidente.get_estado_display }}
+                        </span>
+                    </td>
+                    <td class="text-end">
+                        <div class="d-flex justify-content-end gap-1">
+                            <a href="{% url 'detalle_incidente' incidente.pk %}" class="btn btn-outline-info btn-sm" title="Ver detalle">
+                                <i class="bi bi-eye"></i>
+                            </a>
+                            {% if es_administrador %}
+                            <a href="{% url 'editar_incidente' incidente.pk %}" class="btn btn-outline-secondary btn-sm" title="Editar">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            <form method="post" action="{% url 'eliminar_incidente' incidente.pk %}" onsubmit="return confirm('¿Eliminar este incidente de {{ incidente.get_afectado_nombre }}?');">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-outline-danger btn-sm" title="Eliminar">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </form>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% if page_obj.has_other_pages %}
+<nav class="mt-4">
+    <ul class="pagination justify-content-center">
+        {% if page_obj.has_previous %}
+        <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if query %}&q={{ query }}{% endif %}{% if estado %}&estado={{ estado }}{% endif %}{% if tipo %}&tipo={{ tipo }}{% endif %}{% if afectado %}&afectado={{ afectado }}{% endif %}">
+                <i class="bi bi-chevron-left"></i>
+            </a>
+        </li>
+        {% endif %}
+        {% for num in page_obj.paginator.page_range %}
+            {% if page_obj.number == num %}
+            <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ num }}{% if query %}&q={{ query }}{% endif %}{% if estado %}&estado={{ estado }}{% endif %}{% if tipo %}&tipo={{ tipo }}{% endif %}{% if afectado %}&afectado={{ afectado }}{% endif %}">{{ num }}</a>
+            </li>
+            {% endif %}
+        {% endfor %}
+        {% if page_obj.has_next %}
+        <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if query %}&q={{ query }}{% endif %}{% if estado %}&estado={{ estado }}{% endif %}{% if tipo %}&tipo={{ tipo }}{% endif %}{% if afectado %}&afectado={{ afectado }}{% endif %}">
+                <i class="bi bi-chevron-right"></i>
+            </a>
+        </li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
+
+{% else %}
+<div class="empty-state">
+    <i class="bi bi-exclamation-triangle"></i>
+    <h5>No hay incidentes registrados</h5>
+    <p>Registre el primer incidente o permiso del concejo municipal.</p>
+    {% if es_administrador %}
+    <a href="{% url 'crear_incidente' %}" class="btn btn-primary mt-3">
+        <i class="bi bi-plus-circle me-1"></i>Registrar Incidente
+    </a>
+    {% endif %}
+</div>
+{% endif %}
+{% endblock %}
+

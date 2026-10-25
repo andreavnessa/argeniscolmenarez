@@ -71,9 +71,11 @@
     <p class="text-muted mb-0">
         Mostrando {{ page_obj.start_index }} - {{ page_obj.end_index }} de {{ page_obj.paginator.count }} concejales
     </p>
+    {% if es_administrador %}
     <a href="{% url 'crear_concejal' %}" class="btn btn-primary">
         <i class="bi bi-person-plus me-1"></i>Nuevo Concejal
     </a>
+    {% endif %}
 </div>
 
 {% if concejales %}
@@ -111,6 +113,7 @@
                     <a href="{% url 'detalle_concejal' concejal.pk %}" class="btn btn-outline-primary btn-sm">
                         <i class="bi bi-eye me-1"></i>Ver Despacho
                     </a>
+                    {% if es_administrador %}
                     <a href="{% url 'editar_concejal' concejal.pk %}" class="btn btn-outline-secondary btn-sm">
                         <i class="bi bi-pencil me-1"></i>Editar
                     </a>
@@ -128,6 +131,7 @@
                             <i class="bi bi-person-check me-1"></i>Activar
                         </button>
                     </form>
+                    {% endif %}
                     {% endif %}
                 </div>
             </div>
@@ -171,9 +175,11 @@
     <i class="bi bi-people"></i>
     <h5>No hay concejales registrados</h5>
     <p>Comience registrando el primer concejal del municipio.</p>
+    {% if es_administrador %}
     <a href="{% url 'crear_concejal' %}" class="btn btn-primary mt-3">
         <i class="bi bi-person-plus me-1"></i>Registrar Concejal
     </a>
+    {% endif %}
 </div>
 {% endif %}
 {% endblock %}

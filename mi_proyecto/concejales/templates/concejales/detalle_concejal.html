@@ -32,9 +32,11 @@
         </div>
     </div>
     <div class="d-flex flex-column gap-2">
+        {% if es_administrador %}
         <a href="{% url 'editar_concejal' concejal.pk %}" class="btn btn-primary">
             <i class="bi bi-pencil me-1"></i>Editar
         </a>
+        {% endif %}
         <a href="{% url 'lista_concejales' %}" class="btn btn-secondary">
             <i class="bi bi-arrow-left me-1"></i>Volver
         </a>
@@ -149,7 +151,7 @@
         <div class="detail-section">
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <h5 class="mb-0"><i class="bi bi-people me-2"></i>Equipo de Despacho</h5>
-                {% if puede_agregar_personal %}
+                {% if puede_agregar_personal and not es_despacho %}
                 <a href="{% url 'crear_personal' %}?concejal={{ concejal.pk }}" class="btn btn-primary btn-sm">
                     <i class="bi bi-person-plus me-1"></i>Agregar
                 </a>
@@ -190,18 +192,24 @@
                         <div class="cedula">C.I. {{ miembro.cedula }}</div>
                     </div>
                     <div class="personal-actions">
+                        {% if not es_despacho %}
                         <a href="{% url 'editar_personal' miembro.pk %}" class="btn btn-outline-secondary btn-sm" title="Editar">
                             <i class="bi bi-pencil"></i>
                         </a>
+                        {% endif %}
+                        {% if es_administrador %}
                         <a href="{% url 'reasignar_personal' miembro.pk %}" class="btn btn-outline-primary btn-sm" title="Reasignar">
                             <i class="bi bi-arrow-left-right"></i>
                         </a>
+                        {% endif %}
+                        {% if not es_despacho %}
                         <form method="post" action="{% url 'desactivar_personal' miembro.pk %}" onsubmit="return confirm('¿Desactivar a {{ miembro.get_nombre_completo }}?');">
                             {% csrf_token %}
                             <button type="submit" class="btn btn-outline-danger btn-sm" title="Desactivar">
                                 <i class="bi bi-person-x"></i>
                             </button>
                         </form>
+                        {% endif %}
                     </div>
                 </div>
                 {% endfor %}
@@ -233,12 +241,14 @@
                         <div class="cedula">C.I. {{ miembro.cedula }}</div>
                     </div>
                     <div class="personal-actions">
+                        {% if not es_despacho %}
                         <form method="post" action="{% url 'activar_personal' miembro.pk %}">
                             {% csrf_token %}
                             <button type="submit" class="btn btn-outline-success btn-sm" title="Reactivar">
                                 <i class="bi bi-person-check"></i>
                             </button>
                         </form>
+                        {% endif %}
                     </div>
                 </div>
                 {% endfor %}
